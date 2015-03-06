@@ -16,11 +16,11 @@ var metadata = exif(buf);
 
 Resulting properties are grouped into four objects:
 
-* image: basic TIFF properties about the image
-* thumbnail: basic TIFF properties about the embedded thumbnail
-* exif: full exif data
-* gps: GPS/location data about the image
-* interoperability: interoperability information
+* `image`: basic TIFF properties about the image
+* `thumbnail`: basic TIFF properties about the embedded thumbnail
+* `exif`: full exif data
+* `gps`: GPS/location data about the image
+* `interoperability`: interoperability information
 
 Not all of these properties will always be defined.
 
