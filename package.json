@@ -1,0 +1,30 @@
+{
+  "name": "exif-reader",
+  "version": "1.0.0",
+  "description": "A small EXIF image metadata reader",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/devongovett/exif-reader.git"
+  },
+  "keywords": [
+    "exif",
+    "image",
+    "metadata"
+  ],
+  "author": "Devon Govett <devongovett@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/devongovett/exif-reader/issues"
+  },
+  "homepage": "https://github.com/devongovett/exif-reader",
+  "devDependencies": {
+    "mocha": "^2.1.0"
+  }
+}
