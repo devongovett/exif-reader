@@ -14,6 +14,8 @@ var exif = require('exif-reader');
 var metadata = exif(buf);
 ```
 
+Support is also built into [jpg-stream](https://github.com/devongovett/jpg-stream) for extracting EXIF data from JPEGs using this module.
+
 Resulting properties are grouped into four objects:
 
 * `image`: basic TIFF properties about the image
