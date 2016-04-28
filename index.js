@@ -28,8 +28,12 @@ module.exports = function(buffer) {
   if (ifdOffset !== 0)
     result.thumbnail = readTags(buffer, ifdOffset + 6, bigEndian, tags.exif);
   
-  if (ifd0.ExifOffset)
-    result.exif = readTags(buffer, ifd0.ExifOffset + 6, bigEndian, tags.exif);
+  // The following code seems to have a problem in working with some particular images (eg: test/data/images/Image-having-issue-with-ExifOffset.jpg)
+  // For such images, variable "numValues" inside "readTag()" function gets a very high value.
+  // That makes a loop in that function eat up a lot of memory and the process/worker would eventually crash.
+  // Commenting out the following code until this issue is fixed
+  // if (ifd0.ExifOffset)
+  //   result.exif = readTags(buffer, ifd0.ExifOffset + 6, bigEndian, tags.exif);
   
   if (ifd0.GPSInfo)
     result.gps = readTags(buffer, ifd0.GPSInfo + 6, bigEndian, tags.gps);
