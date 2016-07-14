@@ -7,7 +7,7 @@ var IMG_0774 = fs.readFileSync(__dirname + '/data/IMG_0774.exif');
 describe('exif-reader', function() {
   it('should read tiff and exif data', function() {
     assert.deepEqual(exif(tetons),
-      { image: 
+      { image:
          { Make: 'Canon',
            Model: 'Canon EOS D60',
            Orientation: 1,
@@ -15,25 +15,25 @@ describe('exif-reader', function() {
            YResolution: 300,
            ResolutionUnit: 2,
            Software: 'Adobe Photoshop CS Windows',
-           ModifyDate: new Date("2006-04-05T05:31:30.000Z"),
+           ModifyDate: new Date("2006-04-04T22:31:30.000Z"),
            Artist: 'Unspecified',
            Copyright: 'Unspecified',
            ExifOffset: 256 },
-        thumbnail: 
+        thumbnail:
          { Compression: 6,
            XResolution: 72,
            YResolution: 72,
            ResolutionUnit: 2,
            ThumbnailOffset: 1102,
            ThumbnailLength: 7050 },
-        exif: 
+        exif:
          { ExposureTime: 0.03333333333333333,
            FNumber: 19,
            ExposureProgram: 2,
            ISO: 100,
            ExifVersion: new Buffer([48, 50, 50, 48]),
-           DateTimeOriginal: new Date("2004-06-17T13:47:02.000Z"),
-           DateTimeDigitized: new Date("2004-06-17T13:47:02.000Z"),
+           DateTimeOriginal: new Date("2004-06-17T06:47:02.000Z"),
+           DateTimeDigitized: new Date("2004-06-17T06:47:02.000Z"),
            ComponentsConfiguration: new Buffer([1, 2, 3, 0]),
            CompressedBitsPerPixel: 9,
            ShutterSpeedValue: 4.906890869140625,
@@ -58,10 +58,10 @@ describe('exif-reader', function() {
            WhiteBalance: 0,
            SceneCaptureType: 0 } });
   });
-  
+
   it('should read gps data and other exif data', function() {
     assert.deepEqual(exif(IMG_0774),
-      { image: 
+      { image:
          { Make: 'Apple',
            Model: 'iPhone 6',
            Orientation: 1,
@@ -69,17 +69,17 @@ describe('exif-reader', function() {
            YResolution: 72,
            ResolutionUnit: 2,
            Software: 'Photos 1.0',
-           ModifyDate: new Date("2015-03-01T01:13:57.000Z"),
+           ModifyDate: new Date("2015-02-28T17:13:57.000Z"),
            ExifOffset: 198,
            GPSInfo: 1008 },
-        exif: 
+        exif:
          { ExposureTime: 0.0020491803278688526,
            FNumber: 2.2,
            ExposureProgram: 2,
            ISO: 32,
            ExifVersion: new Buffer([48, 50, 50, 49]),
-           DateTimeOriginal: new Date("2015-03-01T01:13:57.000Z"),
-           DateTimeDigitized: new Date("2015-03-01T01:13:57.000Z"),
+           DateTimeOriginal: new Date("2015-02-28T17:13:57.000Z"),
+           DateTimeDigitized: new Date("2015-02-28T17:13:57.000Z"),
            ComponentsConfiguration: new Buffer([1, 2, 3, 0]),
            ShutterSpeedValue: 8.930864197530864,
            ApertureValue: 2.2750072066878064,
@@ -105,7 +105,7 @@ describe('exif-reader', function() {
            LensSpecification: [ 4.15, 4.15, 2.2, 2.2 ],
            LensMake: 'Apple',
            LensModel: 'iPhone 6 back camera 4.15mm f/2.2' },
-        gps: 
+        gps:
          { GPSLatitudeRef: 'N',
            GPSLatitude: [ 35, 18, 1.49 ],
            GPSLongitudeRef: 'W',
@@ -121,18 +121,18 @@ describe('exif-reader', function() {
            GPSDestBearing: 167.44014084507043,
            GPSDateStamp: '2015:03:01' } });
   });
-  
+
   it('should error when missing Exif tag', function() {
     assert.throws(function() {
       exif(new Buffer(50));
     }, /buffer should start with "Exif"/);
   });
-  
+
   it('should error when missing byte order marker', function() {
     assert.throws(function() {
       exif(new Buffer('Exif\0\0IM'));
     }, /expected byte order marker/);
-    
+
     assert.throws(function() {
       exif(new Buffer('Exif\0\0MI'));
     }, /expected byte order marker/);
