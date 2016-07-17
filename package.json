@@ -7,7 +7,7 @@
     "test": "test"
   },
   "scripts": {
-    "test": "mocha"
+    "test": "UNEXPECTED_CHECK_MAX_ITERATIONS=1000 mocha"
   },
   "repository": {
     "type": "git",
@@ -25,7 +25,9 @@
   },
   "homepage": "https://github.com/devongovett/exif-reader",
   "devDependencies": {
+    "chance-generators": "papandreou/chance-generators#fix/onlyUnwrapPlainObjects",
     "mocha": "^2.1.0",
-    "unexpected": "10.15.0"
+    "unexpected": "10.15.0",
+    "unexpected-check": "unexpectedjs/unexpected-check#feature/defaultMaxIterations"
   }
 }
