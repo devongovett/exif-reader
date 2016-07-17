@@ -25,6 +25,7 @@
   },
   "homepage": "https://github.com/devongovett/exif-reader",
   "devDependencies": {
-    "mocha": "^2.1.0"
+    "mocha": "^2.1.0",
+    "unexpected": "10.15.0"
   }
 }

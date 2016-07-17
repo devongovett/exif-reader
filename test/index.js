@@ -1,13 +1,13 @@
 var exif = require('../');
 var fs = require('fs');
-var assert = require('assert');
+var expect = require('unexpected');
 var tetons = fs.readFileSync(__dirname + '/data/tetons.exif');
 var IMG_0774 = fs.readFileSync(__dirname + '/data/IMG_0774.exif');
 
 describe('exif-reader', function() {
   it('should read tiff and exif data', function() {
-    assert.deepEqual(exif(tetons),
-      { image: 
+    expect(exif(tetons), 'to equal',
+      { image:
          { Make: 'Canon',
            Model: 'Canon EOS D60',
            Orientation: 1,
@@ -19,14 +19,14 @@ describe('exif-reader', function() {
            Artist: 'Unspecified',
            Copyright: 'Unspecified',
            ExifOffset: 256 },
-        thumbnail: 
+        thumbnail:
          { Compression: 6,
            XResolution: 72,
            YResolution: 72,
            ResolutionUnit: 2,
            ThumbnailOffset: 1102,
            ThumbnailLength: 7050 },
-        exif: 
+        exif:
          { ExposureTime: 0.03333333333333333,
            FNumber: 19,
            ExposureProgram: 2,
@@ -58,10 +58,10 @@ describe('exif-reader', function() {
            WhiteBalance: 0,
            SceneCaptureType: 0 } });
   });
-  
+
   it('should read gps data and other exif data', function() {
-    assert.deepEqual(exif(IMG_0774),
-      { image: 
+    expect(exif(IMG_0774), 'to equal',
+      { image:
          { Make: 'Apple',
            Model: 'iPhone 6',
            Orientation: 1,
@@ -72,7 +72,7 @@ describe('exif-reader', function() {
            ModifyDate: new Date("2015-03-01T01:13:57.000Z"),
            ExifOffset: 198,
            GPSInfo: 1008 },
-        exif: 
+        exif:
          { ExposureTime: 0.0020491803278688526,
            FNumber: 2.2,
            ExposureProgram: 2,
@@ -105,7 +105,7 @@ describe('exif-reader', function() {
            LensSpecification: [ 4.15, 4.15, 2.2, 2.2 ],
            LensMake: 'Apple',
            LensModel: 'iPhone 6 back camera 4.15mm f/2.2' },
-        gps: 
+        gps:
          { GPSLatitudeRef: 'N',
            GPSLatitude: [ 35, 18, 1.49 ],
            GPSLongitudeRef: 'W',
@@ -121,20 +121,20 @@ describe('exif-reader', function() {
            GPSDestBearing: 167.44014084507043,
            GPSDateStamp: '2015:03:01' } });
   });
-  
+
   it('should error when missing Exif tag', function() {
-    assert.throws(function() {
+    expect(function() {
       exif(new Buffer(50));
-    }, /buffer should start with "Exif"/);
+    }, 'to throw', /buffer should start with "Exif"/);
   });
-  
+
   it('should error when missing byte order marker', function() {
-    assert.throws(function() {
+    expect(function() {
       exif(new Buffer('Exif\0\0IM'));
-    }, /expected byte order marker/);
-    
-    assert.throws(function() {
+    }, 'to throw', /expected byte order marker/);
+
+    expect(function() {
       exif(new Buffer('Exif\0\0MI'));
-    }, /expected byte order marker/);
+    }, 'to throw', /expected byte order marker/);
   });
 });
