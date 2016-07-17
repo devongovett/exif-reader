@@ -143,53 +143,77 @@ describe('exif-reader', function() {
 describe('fuzz tests', function () {
   this.timeout(60000);
 
+  expect.addAssertion('<any> [when] fuzzed by <function> <assertion>', function (expect, subject, generator) {
+    expect.errorMode = 'nested';
+    return expect(function (value) {
+        return expect.shift(value);
+    }, 'to be valid for all', generator(subject));
+  })
+
   expect.addAssertion('<Buffer> to either parse or throw documented error', function (expect, subject) {
+    expect.errorMode = 'nested';
     var startTime = Date.now();
-    var parsed;
     var err;
     try {
-      parsed = exif(subject);
-      expect(parsed, 'to satisfy', {});
+      expect(exif(subject), 'to satisfy', {});
     } catch (err) {
-      if ([
-        'Invalid EXIF data: buffer should start with "Exif".',
-        'Invalid EXIF data: expected byte order marker.',
-        'Invalid EXIF data: expected 0x002A.',
-        'Invalid EXIF data: ifdOffset < 8',
-        'Invalid EXIF data: Ends before ifdOffset'
-      ].indexOf(err.message) === -1) {
-        expect.errorMode = 'nested';
-        expect.fail('Threw unexpected error: ' + err.stack);
+      if (err.isUnexpected) {
+        throw err;
+      } else {
+        if ([
+          'Invalid EXIF data: buffer should start with "Exif".',
+          'Invalid EXIF data: expected byte order marker.',
+          'Invalid EXIF data: expected 0x002A.',
+          'Invalid EXIF data: ifdOffset < 8',
+          'Invalid EXIF data: Ends before ifdOffset'
+        ].indexOf(err.message) === -1) {
+          expect.errorMode = 'nested';
+          expect.fail('Threw unexpected error: ' + err.stack);
+        }
       }
     } finally {
-      expect(Date.now() - startTime, 'to be less than', 2000);
+      // Guard against very slow runs:
+      expect(Date.now() - startTime, 'to be less than', 1000);
     }
   });
 
-  it('should parse or reject a randomly mutated EXIF data chunk', function () {
-    var g = chanceGenerators(42);
-    var mutations = g.integer({min: 1, max: 10}).map(function (numMutations) {
-      var mutatedExif = new Buffer(tetons); // Make a copy
-      for (var i = 0 ; i < numMutations ; i += 1) {
-        var octetNumber = g.integer({min: 0, max: tetons.length})();
-        mutatedExif[octetNumber] = g.integer({min: 0, max: 255})();
-      }
-      return mutatedExif;
-    });
-    expect(function (mutatedExif) {
-      expect(mutatedExif, 'to either parse or throw documented error');
-    }, 'to be valid for all', mutations);
+  function mutateGenerator(g) {
+    return function mutate(buffer) {
+      var g = chanceGenerators(42);
+      return g.integer({min: 1, max: 10}).map(function (numMutations) {
+        var mutatedBuffer = new Buffer(buffer); // Make a copy
+        for (var i = 0 ; i < numMutations ; i += 1) {
+          var octetNumber = g.integer({min: 0, max: buffer.length})();
+          mutatedBuffer[octetNumber] = g.integer({min: 0, max: 255})();
+        }
+        return mutatedBuffer;
+      });
+    };
+  }
+
+  it('should parse or reject a randomly mutated EXIF data chunk based on the tetons fixture', function () {
+    expect(tetons, 'when fuzzed by', mutateGenerator(chanceGenerators(42)), 'to either parse or throw documented error');
   });
 
-  it('should parse or reject a randomly truncated EXIF data chunk', function () {
-    var g = chanceGenerators(42);
-    var truncations = g.integer({min: 0, max: tetons.length - 1}).map(function (truncateOffset) {
-      var truncatedExif = new Buffer(truncateOffset);
-      tetons.copy(truncatedExif, 0, 0, truncateOffset);
-      return truncatedExif;
-    });
-    expect(function (truncatedExif) {
-      expect(truncatedExif, 'to either parse or throw documented error');
-    }, 'to be valid for all', truncations);
+  it('should parse or reject a randomly mutated EXIF data chunk based on the IMG_0774 fixture', function () {
+    expect(IMG_0774, 'when fuzzed by', mutateGenerator(chanceGenerators(42)), 'to either parse or throw documented error');
+  });
+
+  function truncateGenerator(g) {
+    return function truncate(buffer) {
+      return g.integer({min: 0, max: tetons.length - 1}).map(function (truncateOffset) {
+        var truncatedBuffer = new Buffer(truncateOffset);
+          buffer.copy(truncatedBuffer, 0, 0, truncateOffset);
+          return truncatedBuffer;
+      });
+    }
+  }
+
+  it('should parse or reject a randomly truncated EXIF data chunk based on the tetons fixture', function () {
+    expect(tetons, 'when fuzzed by', truncateGenerator(chanceGenerators(42)), 'to either parse or throw documented error');
+  });
+
+  it('should parse or reject a randomly truncated EXIF data chunk based on the IMG_0774 fixture', function () {
+    expect(IMG_0774, 'when fuzzed by', truncateGenerator(chanceGenerators(42)), 'to either parse or throw documented error');
   });
 });
