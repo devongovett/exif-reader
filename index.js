@@ -69,6 +69,8 @@ function readTags(buffer, offset, bigEndian, tags) {
   for (var i = 0; i < numEntries; i++) {
     if (buffer.length >= offset + 2) {
       var tag = readUInt16(buffer, offset, bigEndian);
+    } else {
+      return null;
     }
     offset += 2;
     
