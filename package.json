@@ -25,9 +25,9 @@
   },
   "homepage": "https://github.com/devongovett/exif-reader",
   "devDependencies": {
-    "chance-generators": "papandreou/chance-generators#fix/onlyUnwrapPlainObjects",
+    "chance-generators": "1.15.2",
     "mocha": "^2.1.0",
     "unexpected": "10.15.0",
-    "unexpected-check": "unexpectedjs/unexpected-check#feature/defaultMaxIterations"
+    "unexpected-check": "1.8.0"
   }
 }
