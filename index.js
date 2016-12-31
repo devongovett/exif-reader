@@ -137,7 +137,7 @@ function parseDate(string) {
   if (!match)
     return null;
 
-  var date = new Date();
+  var date = new Date(1970, 0, 2); // to prevent unexpected month change after setUTCMonth()
   date.setUTCFullYear(match[1]);
   date.setUTCMonth(match[2] - 1);
   date.setUTCDate(match[3]);
