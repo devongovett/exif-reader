@@ -1,6 +1,6 @@
 {
   "name": "exif-reader",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A small EXIF image metadata reader",
   "main": "index.js",
   "directories": {
