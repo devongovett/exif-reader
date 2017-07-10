@@ -72,6 +72,10 @@ var SIZE_LOOKUP = [1, 1, 2, 4, 8, 1, 1, 2, 4, 8];
 
 function readTag(buffer, offset, bigEndian) {
   var type = readUInt16(buffer, offset, bigEndian);
+
+  // Exit early in case of unknown or bogus type
+  if (!type || type > SIZE_LOOKUP.length) return null;
+
   var numValues = readUInt32(buffer, offset + 2, bigEndian);
   var valueSize = SIZE_LOOKUP[type - 1];
   var valueOffset = valueSize * numValues <= 4 ? offset + 6 : readUInt32(buffer, offset + 6, bigEndian) + 6;
