@@ -12,9 +12,12 @@ module.exports = function(buffer) {
   else
     throw new Error('Invalid EXIF data: expected byte order marker.');
 
-  if (readUInt16(buffer, 8, bigEndian) !== 0x002A)
+  if (buffer.length < 10 || readUInt16(buffer, 8, bigEndian) !== 0x002A)
     throw new Error('Invalid EXIF data: expected 0x002A.');
 
+  if (buffer.length <= 14) {
+    throw new Error('Invalid EXIF data: Ends before ifdOffset');
+  }
   var ifdOffset = readUInt32(buffer, 10, bigEndian) + 6;
   if (ifdOffset < 8)
     throw new Error('Invalid EXIF data: ifdOffset < 8');
@@ -23,20 +26,25 @@ module.exports = function(buffer) {
   var ifd0 = readTags(buffer, ifdOffset, bigEndian, tags.exif);
   result.image = ifd0;
 
-  var numEntries = readUInt16(buffer, ifdOffset, bigEndian);
-  ifdOffset = readUInt32(buffer, ifdOffset + 2 + numEntries * 12, bigEndian);
-  if (ifdOffset !== 0)
-    result.thumbnail = readTags(buffer, ifdOffset + 6, bigEndian, tags.exif);
+  if (buffer.length >= ifdOffset + 2) {
+    var numEntries = readUInt16(buffer, ifdOffset, bigEndian);
+    if (buffer.length >= ifdOffset + 2 + numEntries * 12 + 4) {
+      ifdOffset = readUInt32(buffer, ifdOffset + 2 + numEntries * 12, bigEndian);
+      if (ifdOffset !== 0)
+        result.thumbnail = readTags(buffer, ifdOffset + 6, bigEndian, tags.exif);
+    }
+  }
 
-  if (ifd0.ExifOffset)
-    result.exif = readTags(buffer, ifd0.ExifOffset + 6, bigEndian, tags.exif);
-
-  if (ifd0.GPSInfo)
-    result.gps = readTags(buffer, ifd0.GPSInfo + 6, bigEndian, tags.gps);
-
-  if (ifd0.InteropOffset)
-    result.interop = readTags(buffer, ifd0.InteropOffset + 6, bigEndian, tags.exif);
-
+  if (ifd0) {
+    if (ifd0.ExifOffset)
+      result.exif = readTags(buffer, ifd0.ExifOffset + 6, bigEndian, tags.exif);
+    
+    if (ifd0.GPSInfo)
+      result.gps = readTags(buffer, ifd0.GPSInfo + 6, bigEndian, tags.gps);
+    
+    if (ifd0.InteropOffset)
+      result.interop = readTags(buffer, ifd0.InteropOffset + 6, bigEndian, tags.exif);
+  } 
   return result;
 };
 
@@ -47,12 +55,19 @@ var DATE_KEYS = {
 };
 
 function readTags(buffer, offset, bigEndian, tags) {
+  if (buffer.length < offset + 2) {
+    return null;
+  }
   var numEntries = readUInt16(buffer, offset, bigEndian);
   offset += 2;
 
   var res = {};
   for (var i = 0; i < numEntries; i++) {
-    var tag = readUInt16(buffer, offset, bigEndian);
+    if (buffer.length >= offset + 2) {
+      var tag = readUInt16(buffer, offset, bigEndian);
+    } else {
+      return null;
+    }
     offset += 2;
 
     var key = tags[tag] || tag;
@@ -71,11 +86,23 @@ function readTags(buffer, offset, bigEndian, tags) {
 var SIZE_LOOKUP = [1, 1, 2, 4, 8, 1, 1, 2, 4, 8];
 
 function readTag(buffer, offset, bigEndian) {
+  if (buffer.length < offset + 7) {
+    return null;
+  }
   var type = readUInt16(buffer, offset, bigEndian);
   var numValues = readUInt32(buffer, offset + 2, bigEndian);
   var valueSize = SIZE_LOOKUP[type - 1];
-  var valueOffset = valueSize * numValues <= 4 ? offset + 6 : readUInt32(buffer, offset + 6, bigEndian) + 6;
-
+  var valueOffset;
+  if (valueSize * numValues <= 4) {
+    valueOffset = offset + 6;
+  } else {
+    if (buffer.length >= offset + 10) {
+      valueOffset = readUInt32(buffer, offset + 6, bigEndian) + 6;
+    } else {
+      return null;
+    }
+  }
+  
   // Special case for ascii strings
   if (type === 2) {
     var string = buffer.toString('ascii', valueOffset, valueOffset + numValues);
@@ -93,7 +120,7 @@ function readTag(buffer, offset, bigEndian) {
     return readValue(buffer, valueOffset, bigEndian, type);
 
   var res = [];
-  for (var i = 0; i < numValues; i++) {
+  for (var i = 0; i < numValues && valueOffset < buffer.length; i++) {
     res.push(readValue(buffer, valueOffset, bigEndian, type));
     valueOffset += valueSize;
   }
@@ -104,27 +131,51 @@ function readTag(buffer, offset, bigEndian) {
 function readValue(buffer, offset, bigEndian, type) {
   switch (type) {
     case 1: // uint8
+      if (buffer.length < offset + 1) {
+        return null;
+      }
       return buffer[offset];
 
     case 3: // uint16
+      if (buffer.length < offset + 2) {
+        return null;
+      }
       return readUInt16(buffer, offset, bigEndian);
 
     case 4: // uint32
+      if (buffer.length < offset + 4) {
+        return null;
+      }
       return readUInt32(buffer, offset, bigEndian);
 
     case 5: // unsigned rational
+      if (buffer.length < offset + 8) {
+        return null;
+      }
       return readUInt32(buffer, offset, bigEndian) / readUInt32(buffer, offset + 4, bigEndian);
 
     case 6: // int8
+      if (buffer.length < offset + 1) {
+        return null;
+      }
       return buffer.readInt8(offset);
 
     case 8: // int16
+      if (buffer.length < offset + 2) {
+        return null;
+      }
       return readInt16(buffer, offset, bigEndian);
 
     case 9: // int32
+      if (buffer.length < offset + 4) {
+        return null;
+      }
       return readInt32(buffer, offset, bigEndian);
 
     case 10: // signed rational
+      if (buffer.length < offset + 8) {
+        return null;
+      }
       return readInt32(buffer, offset, bigEndian) / readInt32(buffer, offset + 4, bigEndian);
   }
 }
