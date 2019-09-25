@@ -90,6 +90,10 @@ function readTag(buffer, offset, bigEndian) {
     return null;
   }
   var type = readUInt16(buffer, offset, bigEndian);
+
+  // Exit early in case of unknown or bogus type
+  if (!type || type > SIZE_LOOKUP.length) return null;
+
   var numValues = readUInt32(buffer, offset + 2, bigEndian);
   var valueSize = SIZE_LOOKUP[type - 1];
   var valueOffset;
