@@ -25,9 +25,9 @@
   },
   "homepage": "https://github.com/devongovett/exif-reader",
   "devDependencies": {
-    "chance-generators": "1.15.2",
+    "chance-generators": "^3.5.1",
     "mocha": "^2.1.0",
-    "unexpected": "10.15.0",
-    "unexpected-check": "1.8.0"
+    "unexpected": "^11.8.0",
+    "unexpected-check": "^2.2.0"
   }
 }
