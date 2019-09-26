@@ -145,17 +145,9 @@ describe('exif-reader', function() {
 describe('fuzz tests', function () {
   this.timeout(60000);
 
-  expect.addAssertion('<any> [when] fuzzed by <function> <assertion>', function (expect, subject, generator) {
-    expect.errorMode = 'nested';
-    return expect(function (value) {
-      return expect.shift(value);
-    }, 'to be valid for all', generator(subject));
-  })
-
   expect.addAssertion('<object> to either parse or throw documented error', function (expect, subject) {
     expect.errorMode = 'nested';
     var startTime = Date.now();
-    var err;
     try {
       expect(exif(subject), 'to satisfy', {});
     } catch (err) {
