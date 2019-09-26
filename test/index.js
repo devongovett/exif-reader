@@ -184,8 +184,8 @@ describe('fuzz tests', function () {
       return g.integer({min: 1, max: 10}).map(function (numMutations) {
         var mutatedBuffer = Buffer.from(buffer); // Make a copy
         for (var i = 0 ; i < numMutations ; i += 1) {
-          var octetNumber = g.integer({min: 0, max: buffer.length});
-          mutatedBuffer[octetNumber] = g.integer({min: 0, max: 255}).take(1)[0];
+          var octetNumber = g.integer({min: 0, max: buffer.length}).first();
+          mutatedBuffer[octetNumber] = g.integer({min: 0, max: 255}).first();
         }
         return mutatedBuffer;
       });
