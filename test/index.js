@@ -161,8 +161,17 @@ describe('fuzz tests', function () {
           'Invalid EXIF data: ifdOffset < 8',
           'Invalid EXIF data: Ends before ifdOffset'
         ].indexOf(err.message) === -1) {
-          expect.errorMode = 'nested';
-          expect.fail('Threw unexpected error: ' + err.stack);
+          var stack = err.stack;
+          var stackLines = err.stack.split('\n');
+          for (let i = 0 ; i < stackLines.length ; i += 1) {
+            if (/\/node_modules\//.test(stackLines[i])) {
+              stack = stackLines.slice(0, i - 1).join('\n')
+              break;
+            }
+          }
+          expect.fail({
+            message:'Threw unexpected error: ' + stack
+          });
         }
       }
     } finally {
