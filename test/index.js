@@ -196,8 +196,8 @@ describe('fuzz tests', function () {
     return function truncate(buffer) {
       return g.integer({min: 0, max: tetons.length - 1}).map(function (truncateOffset) {
         var truncatedBuffer = Buffer.alloc(truncateOffset);
-          buffer.copy(truncatedBuffer, 0, 0, truncateOffset);
-          return truncatedBuffer;
+        buffer.copy(truncatedBuffer, 0, 0, truncateOffset);
+        return truncatedBuffer;
       });
     }
   }
