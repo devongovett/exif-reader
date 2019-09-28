@@ -40,13 +40,13 @@ module.exports = function(buffer) {
     // For such images, variable "numValues" inside "readTag()" function gets a very high value.
     // That makes a loop in that function eat up a lot of memory and the process/worker would eventually crash.
     // Commenting out the following code until this issue is fixed
-    if (ifd0.ExifOffset)
+    if (isPositiveInteger(ifd0.ExifOffset))
       result.exif = readTags(buffer, ifd0.ExifOffset + 6, bigEndian, tags.exif);
     
-    if (ifd0.GPSInfo)
+    if (isPositiveInteger(ifd0.GPSInfo))
       result.gps = readTags(buffer, ifd0.GPSInfo + 6, bigEndian, tags.gps);
     
-    if (ifd0.InteropOffset)
+    if (isPositiveInteger(ifd0.InteropOffset))
       result.interop = readTags(buffer, ifd0.InteropOffset + 6, bigEndian, tags.exif);
   } 
   return result;
@@ -204,6 +204,10 @@ function parseDate(string) {
     match[6],
     0
   ));
+}
+
+function isPositiveInteger(value) {
+  return typeof value === 'number' && Math.floor(value) === value && value > 0;
 }
 
 // Buffer reading helpers to help switching between endianness
