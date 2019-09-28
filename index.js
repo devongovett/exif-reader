@@ -11,10 +11,10 @@ module.exports = function(buffer) {
     bigEndian = true;
   else
     throw new Error('Invalid EXIF data: expected byte order marker.');
-  
+
   if (buffer.length < 10 || readUInt16(buffer, 8, bigEndian) !== 0x002A)
     throw new Error('Invalid EXIF data: expected 0x002A.');
-  
+
   if (buffer.length <= 14) {
     throw new Error('Invalid EXIF data: Ends before ifdOffset');
   }
@@ -25,7 +25,7 @@ module.exports = function(buffer) {
   var result = {};
   var ifd0 = readTags(buffer, ifdOffset, bigEndian, tags.exif);
   result.image = ifd0;
-  
+
   if (buffer.length >= ifdOffset + 2) {
     var numEntries = readUInt16(buffer, ifdOffset, bigEndian);
     if (buffer.length >= ifdOffset + 2 + numEntries * 12 + 4) {
@@ -34,12 +34,8 @@ module.exports = function(buffer) {
         result.thumbnail = readTags(buffer, ifdOffset + 6, bigEndian, tags.exif);
     }
   }
-  
+
   if (ifd0) {
-    // The following code seems to have a problem in working with some particular images (eg: test/data/images/Image-having-issue-with-ExifOffset.jpg)
-    // For such images, variable "numValues" inside "readTag()" function gets a very high value.
-    // That makes a loop in that function eat up a lot of memory and the process/worker would eventually crash.
-    // Commenting out the following code until this issue is fixed
     if (isPositiveInteger(ifd0.ExifOffset))
       result.exif = readTags(buffer, ifd0.ExifOffset + 6, bigEndian, tags.exif);
     
@@ -191,19 +187,20 @@ function readValue(buffer, offset, bigEndian, type) {
 function parseDate(string) {
   if (typeof string !== 'string')
     return null;
+
   var match = string.match(/^(\d{4}):(\d{2}):(\d{2}) (\d{2}):(\d{2}):(\d{2})$/);
   if (!match)
     return null;
 
-  return new Date(Date.UTC(
-    match[1],
-    match[2] - 1,
-    match[3],
-    match[4],
-    match[5],
-    match[6],
-    0
-  ));
+  var date = new Date(1970, 0, 2); // to prevent unexpected month change after setUTCMonth()
+  date.setUTCFullYear(match[1]);
+  date.setUTCMonth(match[2] - 1);
+  date.setUTCDate(match[3]);
+  date.setUTCHours(match[4]);
+  date.setUTCMinutes(match[5]);
+  date.setUTCSeconds(match[6]);
+  date.setUTCMilliseconds(0);
+  return date;
 }
 
 function isPositiveInteger(value) {
