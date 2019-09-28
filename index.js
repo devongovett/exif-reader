@@ -192,15 +192,15 @@ function parseDate(string) {
   if (!match)
     return null;
 
-  var date = new Date(1970, 0, 2); // to prevent unexpected month change after setUTCMonth()
-  date.setUTCFullYear(match[1]);
-  date.setUTCMonth(match[2] - 1);
-  date.setUTCDate(match[3]);
-  date.setUTCHours(match[4]);
-  date.setUTCMinutes(match[5]);
-  date.setUTCSeconds(match[6]);
-  date.setUTCMilliseconds(0);
-  return date;
+  return new Date(Date.UTC(
+    match[1],
+    match[2] - 1,
+    match[3],
+    match[4],
+    match[5],
+    match[6],
+    0
+  ));
 }
 
 function isPositiveInteger(value) {
