@@ -6,6 +6,9 @@
   "directories": {
     "test": "test"
   },
+  "files": [
+    "tags.js"
+  ],
   "scripts": {
     "test": "UNEXPECTED_CHECK_MAX_ITERATIONS=1000 mocha"
   },
@@ -26,7 +29,7 @@
   "homepage": "https://github.com/devongovett/exif-reader",
   "devDependencies": {
     "chance-generators": "^3.5.2",
-    "mocha": "^2.1.0",
+    "mocha": "^6.2.0",
     "unexpected": "^11.8.0",
     "unexpected-check": "^2.2.0"
   }
