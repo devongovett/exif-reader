@@ -110,10 +110,14 @@ function readTag(buffer, offset, bigEndian, startingOffset) {
       return null;
     }
   }
-  
+
   // Special case for ascii strings
   if (type === 2) {
-    var string = buffer.toString('ascii', valueOffset, valueOffset + numValues);
+    var asciiSlice = buffer.slice(valueOffset, valueOffset + numValues);
+    if (asciiSlice.some(x => x >> 7 > 0))
+      return { buffer: asciiSlice, bigEndian: bigEndian };
+
+    var string = asciiSlice.toString('ascii');
     if (string[string.length - 1] === '\0') // remove null terminator
       string = string.slice(0, -1);
 
