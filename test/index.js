@@ -12,7 +12,8 @@ var non_ascii = fs.readFileSync(__dirname + '/data/non-ascii.exif');
 describe('exif-reader', function() {
   it('should read tiff and exif data', function() {
     expect(exif(tetons), 'to equal',
-      { image:
+      { bigEndian: true,
+        image:
          { Make: 'Canon',
            Model: 'Canon EOS D60',
            Orientation: 1,
@@ -66,7 +67,8 @@ describe('exif-reader', function() {
 
   it('should read gps data and other exif data', function() {
     expect(exif(IMG_0774), 'to equal',
-      { image:
+      { bigEndian: true,
+        image:
          { Make: 'Apple',
            Model: 'iPhone 6',
            Orientation: 1,
@@ -156,8 +158,9 @@ describe('exif-reader', function() {
 
   it('should read non-ascii data', function () {
     expect(exif(non_ascii), 'to equal', {
+      bigEndian: true,
       image: {
-        ImageDescription: { buffer: Buffer.from([0xE4, 0xB8, 0x80, 0xE4, 0xB8, 0x89, 0xE4, 0xB8, 0x80, 0xE5, 0x9B, 0x9B, 0x00]), bigEndian: true },
+        ImageDescription: Buffer.from([0xE4, 0xB8, 0x80, 0xE4, 0xB8, 0x89, 0xE4, 0xB8, 0x80, 0xE5, 0x9B, 0x9B, 0x00]),
         XResolution: 1,
         YResolution: 1,
         ResolutionUnit: 1,
