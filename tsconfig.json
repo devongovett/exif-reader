@@ -1,0 +1,11 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "outDir": "build",
+    "declaration": true
+  },
+  "include": ["./index.ts"],
+  "exclude": [
+    "node_modules"
+  ]
+}

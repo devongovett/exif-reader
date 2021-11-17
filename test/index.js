@@ -1,4 +1,4 @@
-var exif = require('../');
+var exif = require('../build');
 var fs = require('fs');
 var expect = require('unexpected')
   .clone()
