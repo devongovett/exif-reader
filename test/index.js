@@ -1,4 +1,4 @@
-var exif = require('../');
+var exifReader = require('../build');
 var fs = require('fs');
 var expect = require('unexpected')
   .clone()
@@ -6,6 +6,8 @@ var expect = require('unexpected')
 var chanceGenerators = require('chance-generators');
 var tetons = fs.readFileSync(__dirname + '/data/tetons.exif');
 var IMG_0774 = fs.readFileSync(__dirname + '/data/IMG_0774.exif');
+
+const exif = exifReader.default;
 
 describe('exif-reader', function() {
   it('should read tiff and exif data', function() {
