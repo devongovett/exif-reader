@@ -1,46 +1,5 @@
 "use strict";
-exports.__esModule = true;
 var tags_1 = require("./tags");
-function default_1(buffer) {
-    if (buffer.toString('ascii', 0, 5) !== 'Exif\0')
-        throw new Error('Invalid EXIF data: buffer should start with "Exif".');
-    var bigEndian = null;
-    if (buffer[6] === 0x49 && buffer[7] === 0x49)
-        bigEndian = false;
-    else if (buffer[6] === 0x4d && buffer[7] === 0x4d)
-        bigEndian = true;
-    else
-        throw new Error('Invalid EXIF data: expected byte order marker.');
-    if (buffer.length < 10 || readUInt16(buffer, 8, bigEndian) !== 0x002a)
-        throw new Error('Invalid EXIF data: expected 0x002A.');
-    if (buffer.length <= 14) {
-        throw new Error('Invalid EXIF data: Ends before ifdOffset');
-    }
-    var ifdOffset = readUInt32(buffer, 10, bigEndian) + 6;
-    if (ifdOffset < 8)
-        throw new Error('Invalid EXIF data: ifdOffset < 8');
-    var ifd0 = readTags(buffer, ifdOffset, bigEndian, tags_1.exif);
-    var result = { image: ifd0 };
-    result.image = ifd0;
-    if (buffer.length >= ifdOffset + 2) {
-        var numEntries = readUInt16(buffer, ifdOffset, bigEndian);
-        if (buffer.length >= ifdOffset + 2 + numEntries * 12 + 4) {
-            ifdOffset = readUInt32(buffer, ifdOffset + 2 + numEntries * 12, bigEndian);
-            if (ifdOffset !== 0)
-                result.thumbnail = readTags(buffer, ifdOffset + 6, bigEndian, tags_1.exif);
-        }
-    }
-    if (ifd0) {
-        if (isPositiveInteger(ifd0.ExifOffset))
-            result.exif = readTags(buffer, ifd0.ExifOffset + 6, bigEndian, tags_1.exif);
-        if (isPositiveInteger(ifd0.GPSInfo))
-            result.gps = readTags(buffer, ifd0.GPSInfo + 6, bigEndian, tags_1.gps);
-        if (isPositiveInteger(ifd0.InteropOffset))
-            result.interop = readTags(buffer, ifd0.InteropOffset + 6, bigEndian, tags_1.exif);
-    }
-    return result;
-}
-exports["default"] = default_1;
 var DATE_KEYS = {
     DateTimeOriginal: true,
     DateTimeDigitized: true,
@@ -191,3 +150,42 @@ function readInt32(buffer, offset, bigEndian) {
         return buffer.readInt32BE(offset);
     return buffer.readInt32LE(offset);
 }
+module.exports = function (buffer) {
+    if (buffer.toString('ascii', 0, 5) !== 'Exif\0')
+        throw new Error('Invalid EXIF data: buffer should start with "Exif".');
+    var bigEndian = null;
+    if (buffer[6] === 0x49 && buffer[7] === 0x49)
+        bigEndian = false;
+    else if (buffer[6] === 0x4d && buffer[7] === 0x4d)
+        bigEndian = true;
+    else
+        throw new Error('Invalid EXIF data: expected byte order marker.');
+    if (buffer.length < 10 || readUInt16(buffer, 8, bigEndian) !== 0x002a)
+        throw new Error('Invalid EXIF data: expected 0x002A.');
+    if (buffer.length <= 14) {
+        throw new Error('Invalid EXIF data: Ends before ifdOffset');
+    }
+    var ifdOffset = readUInt32(buffer, 10, bigEndian) + 6;
+    if (ifdOffset < 8)
+        throw new Error('Invalid EXIF data: ifdOffset < 8');
+    var ifd0 = readTags(buffer, ifdOffset, bigEndian, tags_1.exif);
+    var result = { image: ifd0 };
+    result.image = ifd0;
+    if (buffer.length >= ifdOffset + 2) {
+        var numEntries = readUInt16(buffer, ifdOffset, bigEndian);
+        if (buffer.length >= ifdOffset + 2 + numEntries * 12 + 4) {
+            ifdOffset = readUInt32(buffer, ifdOffset + 2 + numEntries * 12, bigEndian);
+            if (ifdOffset !== 0)
+                result.thumbnail = readTags(buffer, ifdOffset + 6, bigEndian, tags_1.exif);
+        }
+    }
+    if (ifd0) {
+        if (isPositiveInteger(ifd0.ExifOffset))
+            result.exif = readTags(buffer, ifd0.ExifOffset + 6, bigEndian, tags_1.exif);
+        if (isPositiveInteger(ifd0.GPSInfo))
+            result.gps = readTags(buffer, ifd0.GPSInfo + 6, bigEndian, tags_1.gps);
+        if (isPositiveInteger(ifd0.InteropOffset))
+            result.interop = readTags(buffer, ifd0.InteropOffset + 6, bigEndian, tags_1.exif);
+    }
+    return result;
+};

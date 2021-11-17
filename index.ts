@@ -2,7 +2,7 @@ import { exif, gps } from './tags';
 
 type ReadResult = ReturnType<typeof readTags>;
 
-export default function (buffer: Buffer) {
+export = function (buffer: Buffer) {
   if (buffer.toString('ascii', 0, 5) !== 'Exif\0')
     throw new Error('Invalid EXIF data: buffer should start with "Exif".');
 
@@ -59,7 +59,7 @@ export default function (buffer: Buffer) {
       );
   }
   return result;
-}
+};
 
 var DATE_KEYS = {
   DateTimeOriginal: true,
