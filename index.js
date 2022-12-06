@@ -1,29 +1,33 @@
 var tags = require('./tags');
 
 module.exports = function(buffer) {
-  if (buffer.toString('ascii', 0, 5) !== 'Exif\0')
-    throw new Error('Invalid EXIF data: buffer should start with "Exif".');
-
+  var startingOffset = 0;
+  if (buffer.toString('ascii', 0, 3) !== 'MM\0' && buffer.toString('ascii', 0, 3) !== 'II\0') {
+    startingOffset = 6;
+    if (buffer.toString('ascii', 0, 5) !== 'Exif\0')
+      throw new Error('Invalid EXIF data: buffer should start with "Exif", "MM" or "II".');
+  }
+  
   var bigEndian = null;
-  if (buffer[6] === 0x49 && buffer[7] === 0x49)
+  if (buffer[startingOffset] === 0x49 && buffer[startingOffset + 1] === 0x49)
     bigEndian = false;
-  else if (buffer[6] === 0x4d && buffer[7] === 0x4d)
+  else if (buffer[startingOffset] === 0x4d && buffer[startingOffset + 1] === 0x4d)
     bigEndian = true;
   else
     throw new Error('Invalid EXIF data: expected byte order marker.');
 
-  if (buffer.length < 10 || readUInt16(buffer, 8, bigEndian) !== 0x002A)
+  if (buffer.length < startingOffset + 4 || readUInt16(buffer, startingOffset + 2, bigEndian) !== 0x002A)
     throw new Error('Invalid EXIF data: expected 0x002A.');
 
-  if (buffer.length <= 14) {
+  if (buffer.length <= startingOffset + 8) {
     throw new Error('Invalid EXIF data: Ends before ifdOffset');
   }
-  var ifdOffset = readUInt32(buffer, 10, bigEndian) + 6;
+  var ifdOffset = readUInt32(buffer, startingOffset + 4, bigEndian) + startingOffset;
   if (ifdOffset < 8)
     throw new Error('Invalid EXIF data: ifdOffset < 8');
 
   var result = {};
-  var ifd0 = readTags(buffer, ifdOffset, bigEndian, tags.exif);
+  var ifd0 = readTags(buffer, ifdOffset, bigEndian, tags.exif, startingOffset);
   result.image = ifd0;
 
   if (buffer.length >= ifdOffset + 2) {
@@ -31,19 +35,19 @@ module.exports = function(buffer) {
     if (buffer.length >= ifdOffset + 2 + numEntries * 12 + 4) {
       ifdOffset = readUInt32(buffer, ifdOffset + 2 + numEntries * 12, bigEndian);
       if (ifdOffset !== 0)
-        result.thumbnail = readTags(buffer, ifdOffset + 6, bigEndian, tags.exif);
+        result.thumbnail = readTags(buffer, ifdOffset + startingOffset, bigEndian, tags.exif, startingOffset);
     }
   }
 
   if (ifd0) {
     if (isPositiveInteger(ifd0.ExifOffset))
-      result.exif = readTags(buffer, ifd0.ExifOffset + 6, bigEndian, tags.exif);
+      result.exif = readTags(buffer, ifd0.ExifOffset + startingOffset, bigEndian, tags.exif, startingOffset);
     
     if (isPositiveInteger(ifd0.GPSInfo))
-      result.gps = readTags(buffer, ifd0.GPSInfo + 6, bigEndian, tags.gps);
+      result.gps = readTags(buffer, ifd0.GPSInfo + startingOffset, bigEndian, tags.gps, startingOffset);
     
     if (isPositiveInteger(ifd0.InteropOffset))
-      result.interop = readTags(buffer, ifd0.InteropOffset + 6, bigEndian, tags.exif);
+      result.interop = readTags(buffer, ifd0.InteropOffset + startingOffset, bigEndian, tags.exif, startingOffset);
   } 
   return result;
 };
@@ -54,7 +58,7 @@ var DATE_KEYS = {
   ModifyDate: true
 };
 
-function readTags(buffer, offset, bigEndian, tags) {
+function readTags(buffer, offset, bigEndian, tags, startingOffset) {
   if (buffer.length < offset + 2) {
     return null;
   }
@@ -71,7 +75,7 @@ function readTags(buffer, offset, bigEndian, tags) {
     offset += 2;
 
     var key = tags[tag] || tag;
-    var val = readTag(buffer, offset, bigEndian);
+    var val = readTag(buffer, offset, bigEndian, startingOffset);
 
     if (key in DATE_KEYS)
       val = parseDate(val);
@@ -85,7 +89,7 @@ function readTags(buffer, offset, bigEndian, tags) {
 
 var SIZE_LOOKUP = [1, 1, 2, 4, 8, 1, 1, 2, 4, 8];
 
-function readTag(buffer, offset, bigEndian) {
+function readTag(buffer, offset, bigEndian, startingOffset) {
   if (buffer.length < offset + 7) {
     return null;
   }
@@ -101,7 +105,7 @@ function readTag(buffer, offset, bigEndian) {
     valueOffset = offset + 6;
   } else {
     if (buffer.length >= offset + 10) {
-      valueOffset = readUInt32(buffer, offset + 6, bigEndian) + 6;
+      valueOffset = readUInt32(buffer, offset + 6, bigEndian) + startingOffset;
     } else {
       return null;
     }
@@ -128,7 +132,7 @@ function readTag(buffer, offset, bigEndian) {
     res.push(readValue(buffer, valueOffset, bigEndian, type));
     valueOffset += valueSize;
   }
-
+  
   return res;
 }
 
