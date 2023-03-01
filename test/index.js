@@ -131,7 +131,7 @@ describe('exif-reader', function() {
 
   it('should read gps data and other exif data from png', function() {
     expect(exif(pngWithExif), 'to equal',
-    {
+    { bigEndian: true,
       image: {
         Make: 'Apple', Model: 'iPhone 11 Pro Max', Orientation: 1, XResolution: 72, YResolution: 72, ResolutionUnit: 2, Software: '15.5',
         ModifyDate: new Date('2022-07-08T13:00:46Z'), HostComputer: 'iPhone 11 Pro Max', YCbCrPositioning: 1, ExifOffset: 242, GPSInfo: 2164
