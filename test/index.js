@@ -7,11 +7,13 @@ var chanceGenerators = require('chance-generators');
 var tetons = fs.readFileSync(__dirname + '/data/tetons.exif');
 var IMG_0774 = fs.readFileSync(__dirname + '/data/IMG_0774.exif');
 var pngWithExif = fs.readFileSync(__dirname + '/data/png-exif.exif');
+var non_ascii = fs.readFileSync(__dirname + '/data/non-ascii.exif');
 
 describe('exif-reader', function() {
   it('should read tiff and exif data', function() {
     expect(exif(tetons), 'to equal',
-      { image:
+      { bigEndian: true,
+        image:
          { Make: 'Canon',
            Model: 'Canon EOS D60',
            Orientation: 1,
@@ -65,7 +67,8 @@ describe('exif-reader', function() {
 
   it('should read gps data and other exif data', function() {
     expect(exif(IMG_0774), 'to equal',
-      { image:
+      { bigEndian: true,
+        image:
          { Make: 'Apple',
            Model: 'iPhone 6',
            Orientation: 1,
@@ -128,7 +131,7 @@ describe('exif-reader', function() {
 
   it('should read gps data and other exif data from png', function() {
     expect(exif(pngWithExif), 'to equal',
-    {
+    { bigEndian: true,
       image: {
         Make: 'Apple', Model: 'iPhone 11 Pro Max', Orientation: 1, XResolution: 72, YResolution: 72, ResolutionUnit: 2, Software: '15.5',
         ModifyDate: new Date('2022-07-08T13:00:46Z'), HostComputer: 'iPhone 11 Pro Max', YCbCrPositioning: 1, ExifOffset: 242, GPSInfo: 2164
@@ -149,6 +152,19 @@ describe('exif-reader', function() {
         GPSLatitudeRef: 'N', GPSLatitude: [ 55, 14, 24.61 ], GPSLongitudeRef: 'W', GPSLongitude: [ 6, 30, 38.2 ], GPSAltitudeRef: 0,
         GPSAltitude: 6.37630192378385, GPSSpeedRef: 'K', GPSSpeed: 0, GPSImgDirectionRef: 'T', GPSImgDirection: 268.3018480492813, GPSDestBearingRef: 'T',
         GPSDestBearing: 268.3018480492813, GPSHPositioningError: 4.884441575209813
+      }
+    });
+  });
+
+  it('should read non-ascii data', function () {
+    expect(exif(non_ascii), 'to equal', {
+      bigEndian: true,
+      image: {
+        ImageDescription: Buffer.from([0xE4, 0xB8, 0x80, 0xE4, 0xB8, 0x89, 0xE4, 0xB8, 0x80, 0xE5, 0x9B, 0x9B, 0x00]),
+        XResolution: 1,
+        YResolution: 1,
+        ResolutionUnit: 1,
+        YCbCrPositioning: 1
       }
     });
   });

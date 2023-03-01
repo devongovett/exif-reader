@@ -26,7 +26,7 @@ module.exports = function(buffer) {
   if (ifdOffset < 8)
     throw new Error('Invalid EXIF data: ifdOffset < 8');
 
-  var result = {};
+  var result = { bigEndian };
   var ifd0 = readTags(buffer, ifdOffset, bigEndian, tags.exif, startingOffset);
   result.image = ifd0;
 
@@ -110,10 +110,14 @@ function readTag(buffer, offset, bigEndian, startingOffset) {
       return null;
     }
   }
-  
+
   // Special case for ascii strings
   if (type === 2) {
-    var string = buffer.toString('ascii', valueOffset, valueOffset + numValues);
+    var asciiSlice = buffer.slice(valueOffset, valueOffset + numValues);
+    if (asciiSlice.some(x => x >> 7 > 0))
+      return asciiSlice;
+
+    var string = asciiSlice.toString('ascii');
     if (string[string.length - 1] === '\0') // remove null terminator
       string = string.slice(0, -1);
 
