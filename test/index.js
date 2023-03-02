@@ -249,6 +249,10 @@ describe('fuzz tests', function () {
     expect(pngWithExif, 'when fuzzed by', mutateGenerator(chanceGenerators), 'to either parse or throw documented error');
   });
 
+  it('should parse or reject a randomly mutated EXIF data chunk based on the non_ascii fixture', function () {
+    expect(non_ascii, 'when fuzzed by', mutateGenerator(chanceGenerators), 'to either parse or throw documented error');
+  });
+
   function truncateGenerator(g) {
     return function truncate(buffer) {
       return g.integer({min: 0, max: tetons.length - 1}).map(function (truncateOffset) {
@@ -271,4 +275,7 @@ describe('fuzz tests', function () {
     expect(pngWithExif, 'when fuzzed by', truncateGenerator(chanceGenerators), 'to either parse or throw documented error');
   });
 
+  it('should parse or reject a randomly truncated EXIF data chunk based on the non_ascii fixture', function () {
+    expect(non_ascii, 'when fuzzed by', truncateGenerator(chanceGenerators), 'to either parse or throw documented error');
+  });
 });
