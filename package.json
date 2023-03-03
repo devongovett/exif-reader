@@ -10,7 +10,7 @@
     "tags.js"
   ],
   "scripts": {
-    "test": "UNEXPECTED_CHECK_MAX_ITERATIONS=1000 mocha"
+    "test": "UNEXPECTED_CHECK_MAX_ITERATIONS=10000 mocha"
   },
   "repository": {
     "type": "git",
@@ -29,8 +29,8 @@
   "homepage": "https://github.com/devongovett/exif-reader",
   "devDependencies": {
     "chance-generators": "^3.5.2",
-    "mocha": "^6.2.0",
-    "unexpected": "^11.8.0",
-    "unexpected-check": "^2.2.0"
+    "mocha": "^10.2.0",
+    "unexpected": "^13.1.0",
+    "unexpected-check": "^3.1.0"
   }
 }
