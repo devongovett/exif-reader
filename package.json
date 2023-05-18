@@ -3,11 +3,13 @@
   "version": "1.2.0",
   "description": "A small EXIF image metadata reader",
   "main": "index.js",
+  "types": "index.d.ts",
   "directories": {
     "test": "test"
   },
   "files": [
-    "tags.js"
+    "tags.js",
+    "index.d.ts"
   ],
   "scripts": {
     "test": "UNEXPECTED_CHECK_MAX_ITERATIONS=10000 mocha"
