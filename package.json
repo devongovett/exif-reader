@@ -30,7 +30,7 @@
   },
   "homepage": "https://github.com/devongovett/exif-reader",
   "devDependencies": {
-    "@types/node": "^16.18.31",
+    "@types/node": "*",
     "chance-generators": "^3.5.2",
     "mocha": "^10.2.0",
     "tsd": "^0.28.1",
