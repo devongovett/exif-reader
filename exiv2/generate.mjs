@@ -14,7 +14,7 @@ const tagGroups = groups.map((group) => [
 
 const generateTagGroup = ([group, tags]) => `
 exports.${group} = {
-  ${tags.map(([tagId, , tagName]) => `${tagId}: '${tagName}'`).join(',\n  ')}
+  ${tags.map(([tagId, , tagName]) => `${tagId.toLowerCase()}: '${tagName}'`).join(',\n  ')}
 };`;
 
 const tagsjs = `/**
