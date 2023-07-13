@@ -22,7 +22,7 @@ and a well structured list of all [standard Exif tags](https://exiv2.org/tags.ht
 together with type information. 
 
 When I realised that the exiv2 cli was already installed on my machine, I used it
-to compare the ouptut of exiv2 and  exif-reader with `exiv2 -p e some.jpg`.
+to compare the output of exiv2 and exif-reader with `exiv2 -p e some.jpg`.
 
 IMHO the exiv2 project is trying to follow the spec one to one, while the exiftool project
 diverges a bit. For example the tag 0x0132 is called `DateTime` in Exif and Exiv2, but `ModifyDate`
