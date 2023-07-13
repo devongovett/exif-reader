@@ -54,7 +54,7 @@ different values for different tags with the same name (e.g. WhiteBalance),
 they will experience a behavioural change.
 
 ## Duplicate Tag Names
-This is most probable a bug in exif-reader, as those tags would return wrong results if 
+This is most probably a bug in exif-reader, as those tags would return wrong results if 
 they exist in the same file: 
 | Tag Name | TagIds |
 |--- | ---
