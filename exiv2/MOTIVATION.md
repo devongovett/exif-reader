@@ -1,59 +1,39 @@
 
 # Use standard Exif group and tagnames, use Exiv2 metatdata as source of truth 
 
-Note: This is a RFC and not a real issue. My intention is to get
-feedback about an idea I had when tried to solve my own issue #27 for better
-Typescript support.
+This PR adds Typescript definitions and standard Exif names. 
+It was motivated by issue #27, but expanded into bringing standard Exif tags
+and type them properly. This is a breaking change, as new tags are added
+or renamed to match the Exif standard, and non standard tags are removed. 
 
-While working on this issue I noticed some things that made me scratch my head
- - where could I find an official Exif spec?
- - why are tags distributed into different groups?
- - why do we have the same tag name for different tag ids?
- - what are the correct types? Where are they specified? 
- - why are some tags missing and are accessible only by tag id? 
-
-So I spent some time looking at 
+The original inspiration for this project was probably
 [exiftool](http://www.sno.phy.queensu.ca/~phil/exiftool/TagNames/EXIF.html)
-which seems to be the original inspiration to this project. 
+which maintains a huge list of standard and non standard tags. 
+Many tag names are are slightly from the [Exif spec](https://www.cipa.jp/std/documents/e/DC-008-2012_E.pdf)
+and the type description is often a little bit fuzzy. 
 
-Then I found the nice [Exiv2 project](https://exiv2.org/index.html) that at least
-had a working link to the [Exif spec](https://www.cipa.jp/std/documents/e/DC-008-2012_E.pdf) 
-and a well structured list of all [standard Exif tags](https://exiv2.org/tags.html) 
-together with type information. 
+The [Exiv2 project](https://exiv2.org/index.html) maintains a well structured list 
+of all [standard Exif tags](https://exiv2.org/tags.html) together with type information. 
 
-When I realised that the exiv2 cli was already installed on my machine, I used it
-to compare the output of exiv2 and exif-reader with `exiv2 -p e some.jpg`.
+Exiv2 tries to follow the spec by the book, while the exiftool project
+diverges a bit. For example the tag 0x0132 is called `DateTime` in the specs, 
+but exiftool calls it `ModifyDate`. 
 
-IMHO the exiv2 project is trying to follow the spec one to one, while the exiftool project
-diverges a bit. For example the tag 0x0132 is called `DateTime` in Exif and Exiv2, but `ModifyDate`
-in exiftool and exif-reader. Exiftool lists tags that are not found in the specs.
-The exiv2 project provides structured access to the data type of each tag, my
-original motiviation for starting all this. 
+The Exiv2 project includes a tool called taglist, that list all standard tag names with their types.
+The output of this tool is used to generate the `tags.js` file and the type definition `index.d.ts`.
 
-So my proposal is, can we just generate the `tags.js` file and the type definition `index.d.ts`
-based on the metadata from eviv2? That would give us some benefits
-- standard group and tagnames, reuse of the eviv2 documentation
-- a more uptodate list of tags
-- automatic generated typescript types 
-  
-It also has some drawbacks:
-- some tag names would change (e.g. ModifyDate to DateTime) so this 
-  is a breaking change tha needs a major (2.0) release
-- non Exif tags (e.g. `InkSet`, `InkNames` or `FaxRecvParams`) now no longer have a tag name (but would
-still be accessible by tag id if they are actually inside a file)  
-- dependent project must apply changes when upgrading (easy with Typescript support)  
+The goal is, to keep exif-reader tag names in sync with exiv2 definition and documentation.
 
-I prepared a [branch of my proposed change](https://github.com/atombrenner/exif-reader/tree/feature/generate-tags-and-types-from-exiv2). Please have a look.
+## Upgrade Instructions
 
+Remove separate types package `@types/exif-reader` from your dependencies if present.
 
-I think this change would align this project with the Exif Spec, 
-but I fully understand that this is a breaking change that will cause effort for users of this project.
-In most cases it's just adjusting tag names. The following table of changed tag names 
-will help with that. Only if someone relied on the edge case, when a file really contains
-different values for different tags with the same name (e.g. WhiteBalance),
-they will experience a behavioural change.
+Code that used renamed or removed tagnames will cause Typescript errors. 
+The following tables of changed tag names will help with migration. 
+Non standard tags can still be accessed by their numeric tag-id,
+ e.g. the id for `FaxRecvParams` is `34908`.
 
-## Duplicate Tag Names
+### Duplicate Tag Names
 This is most probably a bug in exif-reader, as those tags would return wrong results if 
 they exist in the same file: 
 | Tag Name | TagIds |
@@ -78,7 +58,7 @@ they exist in the same file:
 | Saturation | 0xa409, 0xfe55 |
 | Sharpness | 0xa40a, 0xfe56 |
 
-## Changed Tag Names
+### Changed Tag Names
 
 | Current Tag Name | Proposed Tag Name Exiv2/Exif  |
 | --- | --- |
@@ -111,7 +91,7 @@ they exist in the same file:
 |ProfileIFD|ExtraCameraProfiles|
 |OriginalBestQualitySize|OriginalBestQualityFinalSize|
 
-## New Tag Names
+### New Tag Names
 
 | Current Tag Name | Proposed Tag Name Exiv2/Exif  |
 | --- | --- |
@@ -151,8 +131,8 @@ they exist in the same file:
 |42081|SourceImageNumberOfCompositeImage|
 |42082|SourceExposureTimesOfCompositeImage|
 
-## Non standard Tag Names (removed)
-A sampling of those values on https://exiftool.org/TagNames/EXIF.html indicates  that they are either
+### Non standard Tag Names (removed)
+A sampling of those values on https://exiftool.org/TagNames/EXIF.html indicates that they are either
 offsets to vendor specific IFDs or are not part of any IFD (basicly undocumented on exiftool)
 
 | Current Tag Name | Generic Tag Id, not present in Exif Standard  |
