@@ -1,13 +1,13 @@
 var tags = require('./tags');
 
-module.exports = function(buffer) {
+module.exports = function (buffer) {
   var startingOffset = 0;
   if (buffer.toString('ascii', 0, 3) !== 'MM\0' && buffer.toString('ascii', 0, 3) !== 'II\0') {
     startingOffset = 6;
     if (buffer.toString('ascii', 0, 5) !== 'Exif\0')
       throw new Error('Invalid EXIF data: buffer should start with "Exif", "MM" or "II".');
   }
-  
+
   var bigEndian = null;
   if (buffer[startingOffset] === 0x49 && buffer[startingOffset + 1] === 0x49)
     bigEndian = false;
@@ -27,35 +27,35 @@ module.exports = function(buffer) {
     throw new Error('Invalid EXIF data: ifdOffset < 8');
 
   var result = { bigEndian };
-  var ifd0 = readTags(buffer, ifdOffset, bigEndian, tags.exif, startingOffset);
-  result.image = ifd0;
+  result.Image = readTags(buffer, ifdOffset, bigEndian, tags.Image, startingOffset);
 
   if (buffer.length >= ifdOffset + 2) {
     var numEntries = readUInt16(buffer, ifdOffset, bigEndian);
     if (buffer.length >= ifdOffset + 2 + numEntries * 12 + 4) {
       ifdOffset = readUInt32(buffer, ifdOffset + 2 + numEntries * 12, bigEndian);
       if (ifdOffset !== 0)
-        result.thumbnail = readTags(buffer, ifdOffset + startingOffset, bigEndian, tags.exif, startingOffset);
+        result.Thumbnail = readTags(buffer, ifdOffset + startingOffset, bigEndian, tags.Image, startingOffset);
     }
   }
 
-  if (ifd0) {
-    if (isPositiveInteger(ifd0.ExifOffset))
-      result.exif = readTags(buffer, ifd0.ExifOffset + startingOffset, bigEndian, tags.exif, startingOffset);
-    
-    if (isPositiveInteger(ifd0.GPSInfo))
-      result.gps = readTags(buffer, ifd0.GPSInfo + startingOffset, bigEndian, tags.gps, startingOffset);
-    
-    if (isPositiveInteger(ifd0.InteropOffset))
-      result.interop = readTags(buffer, ifd0.InteropOffset + startingOffset, bigEndian, tags.exif, startingOffset);
-  } 
+  if (result.Image) {
+    if (isPositiveInteger(result.Image.ExifTag))
+      result.Photo = readTags(buffer, result.Image.ExifTag + startingOffset, bigEndian, tags.Photo, startingOffset);
+
+    if (isPositiveInteger(result.Image.GPSTag))
+      result.GPSInfo = readTags(buffer, result.Image.GPSTag + startingOffset, bigEndian, tags.GPSInfo, startingOffset);
+  }
+  if (result.Photo && isPositiveInteger(result.Photo.InteroperabilityTag)) {
+    result.Iop = readTags(buffer, result.Photo.InteroperabilityTag + startingOffset, bigEndian, tags.Iop, startingOffset);
+  }
+
   return result;
 };
 
 var DATE_KEYS = {
   DateTimeOriginal: true,
   DateTimeDigitized: true,
-  ModifyDate: true
+  DateTime: true
 };
 
 function readTags(buffer, offset, bigEndian, tags, startingOffset) {
@@ -136,7 +136,7 @@ function readTag(buffer, offset, bigEndian, startingOffset) {
     res.push(readValue(buffer, valueOffset, bigEndian, type));
     valueOffset += valueSize;
   }
-  
+
   return res;
 }
 
