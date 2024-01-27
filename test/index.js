@@ -8,6 +8,7 @@ var tetons = fs.readFileSync(__dirname + '/data/tetons.exif');
 var IMG_0774 = fs.readFileSync(__dirname + '/data/IMG_0774.exif');
 var pngWithExif = fs.readFileSync(__dirname + '/data/png-exif.exif');
 var non_ascii = fs.readFileSync(__dirname + '/data/non-ascii.exif');
+var littleEndian = fs.readFileSync(__dirname + '/data/little-endian.exif');
 
 describe('exif-reader', function () {
   it('should read tiff and exif data', function () {
@@ -230,6 +231,29 @@ describe('exif-reader', function () {
         YResolution: 1,
         ResolutionUnit: 1,
         YCbCrPositioning: 1
+      }
+    });
+  });
+
+  it('should read little endian data', function () {
+    expect(exif(littleEndian), 'to equal', {
+      bigEndian: false,
+      Image: {
+        Orientation: 1,
+        XResolution: 25.4,
+        YResolution: 25.4,
+        ResolutionUnit: 2,
+        Software: 'sharp',
+        YCbCrPositioning: 1,
+        ExifTag: 120
+      },
+      Photo: {
+        ExifVersion: Buffer.from([0x30, 0x32, 0x31, 0x30]),
+        ComponentsConfiguration: Buffer.from([0x01, 0x02, 0x03, 0x00]),
+        FlashpixVersion: Buffer.from([0x30, 0x31, 0x30, 0x30]),
+        ColorSpace: 65535,
+        PixelXDimension: 1,
+        PixelYDimension: 1
       }
     });
   });
