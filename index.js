@@ -2,7 +2,7 @@ var tags = require('./tags');
 
 module.exports = function (buffer) {
   var startingOffset = 0;
-  if (buffer.toString('ascii', 0, 3) !== 'MM\0' && buffer.toString('ascii', 0, 3) !== 'II\0') {
+  if (buffer.toString('ascii', 0, 3) !== 'MM\0' && buffer.toString('ascii', 0, 3) !== 'II\x2a') {
     startingOffset = 6;
     if (buffer.toString('ascii', 0, 5) !== 'Exif\0')
       throw new Error('Invalid EXIF data: buffer should start with "Exif", "MM" or "II".');
