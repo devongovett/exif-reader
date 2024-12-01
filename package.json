@@ -1,6 +1,6 @@
 {
   "name": "exif-reader",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "A small EXIF image metadata reader",
   "main": "index.js",
   "types": "index.d.ts",
@@ -33,7 +33,7 @@
     "@types/node": "*",
     "chance-generators": "^3.5.2",
     "mocha": "^10.2.0",
-    "tsd": "^0.28.1",
+    "tsd": "^0.31.2",
     "unexpected": "^13.1.0",
     "unexpected-check": "^3.1.0"
   }

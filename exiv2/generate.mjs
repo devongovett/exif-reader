@@ -86,12 +86,11 @@ const numberArrayTags = {
 const generateTagGroupTypes = ([
   group,
   tags,
-]) => `export type ${group}Tags = Record<string, GenericTag> & {
-  ${tags
+]) => `  type ${group}Tags = Record<string, GenericTag> & {
+    ${tags
     .map(([, group, tag, type]) => `${tag}: ${getType(group, tag, type)}`)
-    .join('\n  ')}
-}
-`;
+    .join('\n    ')}
+  }`;
 
 const indexdts = `/**
 * generated based on Exiv2 and Exif information, do not change manually
@@ -99,18 +98,20 @@ const indexdts = `/**
 * - https://www.cipa.jp/std/documents/e/DC-008-2012_E.pdf
 */
 
-export default function exif(buffer: Buffer): Exif;
+declare function exif(buffer: Buffer): exif.Exif;
+export = exif;
 
-export type Exif = {
-  bigEndian: boolean
-  ${groups.map((group) => `${group}?: Partial<${group}Tags>`).join('\n  ')}
-  ThumbnailTags?: Partial<ImageTags>
+declare namespace exif {
+  type Exif = {
+    bigEndian: boolean
+    ${groups.map((group) => `${group}?: Partial<${group}Tags>`).join('\n    ')}
+    ThumbnailTags?: Partial<ImageTags>
+  }
+
+${tagGroups.map(generateTagGroupTypes).join('\n\n')}
+
+  type GenericTag = number | number[] | string | Buffer
 }
-
-${tagGroups.map(generateTagGroupTypes).join('\n')}
-
-export type GenericTag = number | number[] | string | Buffer;
 `;
 
 writeFileSync(join(wd, '..', 'index.d.ts'), indexdts);
-// console.log(indexdts);
