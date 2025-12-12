@@ -4,12 +4,27 @@ on:
   - pull_request
 permissions: {}
 jobs:
-  CI:
+  test:
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
         with:
           node-version: current
       - run: npm install
       - run: npm test
+  publish:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: test
+    permissions:
+      contents: read
+      id-token: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: current
+      - run: npm publish
